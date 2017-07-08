@@ -1,5 +1,4 @@
-react-setstate-connect
-====
+# react-setstate-connect
 
 **react-setstate-connect** is NOT another Flux library. 
 
