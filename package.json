@@ -1,9 +1,10 @@
 {
   "name": "react-setstate-connect",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "",
   "main": "index.js",
   "scripts": {
+    "lint": "standard",
     "test": "NODE_ENV=test mocha --ui bdd --compilers js:babel-register -r ./test/helpers.js --recursive"
   },
   "keywords": [
@@ -26,10 +27,19 @@
     "jsdom": "^11.1.0",
     "mocha": "^3.4.2",
     "must": "^0.13.4",
-    "must-sinon": "^0.0.0",
     "react": "^15.6.1",
     "react-dom": "^15.6.1",
     "react-test-renderer": "^15.6.1",
-    "sinon": "^2.3.6"
+    "standard": "^10.0.2"
+  },
+  "standard": {
+    "globals": [
+      "after",
+      "afterEach",
+      "before",
+      "beforeEach",
+      "describe",
+      "it"
+    ]
   }
 }

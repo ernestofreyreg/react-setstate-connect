@@ -3,28 +3,23 @@ react-setstate-connect
 
 **react-setstate-connect** is NOT another Flux library. 
 
-This javascript module contains 2 helper functions: `connect` and `createDispatcher`
+This javascript module contains 1 helper function: `connect`
 
 `connect` is a HOC function that wraps React components and allows you to inject props and actions function from a 
 redux-like state management construct. 
 
-`createDispatcher` takes a reducer function in the form **(state, action) => state** and a set function in the form
-**(fn) => Promise.resolve()**. and helps building such state management construct. 
-
 ### How to use it:
 
 You can put your state management code in a single file, you will need an initial state object, a reducer function 
-in the form **(state, action) => state** and a createActions function in the form **({get, set}) => {actions}**. 
+in the form **(state, action) => state** and a createActions function in the form **({getState, dispatch}) => {actions}**. 
 
 _state.js_
 ```jsx harmony
-import { createDispatcher } from 'react-setstate-connect'
-
-const initialState = {
+export const initialState = {
   value: 0
 }
 
-function reducer (state, action) {
+export function reducer (state, action) {
   switch (action.type) {
     case 'INCREASE': return {state, value: state.value + action.value}
     case 'DECREASE': return {state, value: state.value - action.value}
@@ -32,9 +27,7 @@ function reducer (state, action) {
   }
 }
 
-function createActions ({get, set}) {
-  const dispatch = createDispatcher(reducer, set)
-  
+export function createActions ({getState, dispatch}) {
   const increase = value => dispatch('INCREASE', {value})
   const increase1 = () => dispatch('INCREASE', {value: 1})
   const decrease = value => dispatch('DECREASE', {value})
@@ -60,8 +53,8 @@ You must wrap your component with the connect function
 
 _ValueButton.js_
 ```jsx harmony
-import { connect } from 'react-setstate-connect'
-import { createActions, initialState } from './state.js'
+import connect from 'react-setstate-connect'
+import { createActions, initialState, reducer } from './state.js'
 
 const ValueButton = ({value, increase1, decrease1, delayedIncrease}) => (
   <div>
@@ -72,13 +65,11 @@ const ValueButton = ({value, increase1, decrease1, delayedIncrease}) => (
 )
 
 
-export default connect(ValueButton, createActions, initialState)
+export default connect(ValueButton, reducer, createActions, initialState)
 ```
 
 ### Pro tips
 - Keep the state management code and the wrapped component close together.
-- From the state file export the initial state object, the reducer and the create actions functions. This will help on 
-testing the reducer too.
 - By default all actions in the form **(props) => dispatch(type, props)** return promises, so, is a good thing to make 
 all async actions return promises as well.
 - Your wrapped component should never need to use setState directly, if you find yourself adding this.setState then go

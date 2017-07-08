@@ -1,13 +1,9 @@
 'use strict'
 
+require('must')
 const React = require('react')
-const expect = require('must')
 const { mount } = require('enzyme')
-const sinon = require('sinon')
-const mustSinon = require('must-sinon')
-const {connect, createDispatcher} = require('../../index')
-
-mustSinon(expect)
+const connect = require('../../index')
 
 describe('connect', () => {
   const DummyComponent = props => <ol>{Object.keys(props).map(prop => <li key={prop}>{`${prop} = ${props[prop]}`}</li>)}</ol>
@@ -25,9 +21,8 @@ describe('connect', () => {
       default: return state
     }
   }
-  const mockActions = ({get, set}) => {
-    const dispatch = createDispatcher(reducer, set)
 
+  const mockActions = ({getState, dispatch}) => {
     const addsToA = value => dispatch('ADDS_A', {value})
     const addsToB = value => dispatch('ADDS_B', {value})
 
@@ -40,7 +35,7 @@ describe('connect', () => {
     }
 
     const addsBIntoA = () => {
-      const b = get().b
+      const b = getState().b
       return addsToA(b)
     }
 
@@ -48,14 +43,14 @@ describe('connect', () => {
   }
 
   it('wraps dummy component', () => {
-    const wrapped = connect(DummyComponent, mockActions, initState)
+    const wrapped = connect(DummyComponent, reducer, mockActions, initState)
     const component = mount(React.createElement(wrapped, {}))
     component.find('Connected').must.have.length(1)
     component.find('Connected').find('DummyComponent').must.have.length(1)
   })
 
   it('passes down state and actions as props', () => {
-    const wrapped = connect(DummyComponent, mockActions, initState)
+    const wrapped = connect(DummyComponent, reducer, mockActions, initState)
     const component = mount(React.createElement(wrapped, {}))
     const dummyProps = component.find('Connected').find('DummyComponent').get(0).props
     dummyProps.must.have.property('a', 0)
@@ -71,14 +66,14 @@ describe('connect', () => {
   })
 
   it('passes down props wrapping props', () => {
-    const wrapped = connect(DummyComponent, mockActions, initState)
+    const wrapped = connect(DummyComponent, reducer, mockActions, initState)
     const component = mount(React.createElement(wrapped, {someProp: 45}))
     const dummyProps = component.find('Connected').find('DummyComponent').get(0).props
     dummyProps.must.have.property('someProp', 45)
   })
 
   it('calling actions', () => {
-    const wrapped = connect(DummyComponent, mockActions, initState)
+    const wrapped = connect(DummyComponent, reducer, mockActions, initState)
     const component = mount(React.createElement(wrapped, {}))
     return component.find('DummyComponent').get(0).props.addsToA(4)
       .then(() => {
@@ -87,7 +82,7 @@ describe('connect', () => {
   })
 
   it('calling async actions', () => {
-    const wrapped = connect(DummyComponent, mockActions, initState)
+    const wrapped = connect(DummyComponent, reducer, mockActions, initState)
     const component = mount(React.createElement(wrapped, {}))
     const promise = component.find('DummyComponent').get(0).props.asyncAddsToA(4, 1000)
       .then(() => {
@@ -98,7 +93,7 @@ describe('connect', () => {
   })
 
   it('async actions have access to state via get', () => {
-    const wrapped = connect(DummyComponent, mockActions, Object.assign({}, initState, {a: 8}))
+    const wrapped = connect(DummyComponent, reducer, mockActions, Object.assign({}, initState, {a: 8}))
     const component = mount(React.createElement(wrapped, {}))
     return component.find('DummyComponent').get(0).props.addsToB(9)
       .then(() => component.find('DummyComponent').get(0).props.addsBIntoA())
