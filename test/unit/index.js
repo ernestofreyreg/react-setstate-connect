@@ -3,7 +3,7 @@
 require('must')
 const React = require('react')
 const { mount } = require('enzyme')
-const connect = require('../../index')
+const connect = require('../../lib/index')
 
 describe('connect', () => {
   const DummyComponent = props => <ol>{Object.keys(props).map(prop => <li key={prop}>{`${prop} = ${props[prop]}`}</li>)}</ol>
