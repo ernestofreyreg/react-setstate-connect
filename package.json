@@ -4,7 +4,7 @@
   "description": "Helper function to connect React's component to a redux-like store using functional setState.",
   "main": "lib/index.js",
   "scripts": {
-    "build": "`yarn bin`/babel index.js --out-dir lib",
+    "build": "`yarn bin`/babel src --out-dir lib",
     "lint": "standard",
     "test": "yarn build && NODE_ENV=test mocha --ui bdd --compilers js:babel-register -r ./test/helpers.js --recursive"
   },

@@ -8,11 +8,13 @@ const connect = (component, reducer, actionsCreator, initialState) => {
     dispatch: createDispatcher(reducer, fn => new Promise(resolve => instance.setState(fn, resolve)))
   })
 
+  const createDispatcher = (reducer, set) => (type, params = {}) => set(state => reducer(state, Object.assign({type}, params)))
+
   return class Connected extends React.PureComponent {
     constructor (props, context) {
       super(props, context)
 
-      this.state = initialState
+      this.state = initialState || {}
       this.actions = actionsCreator(attach(this))
     }
 
@@ -22,6 +24,5 @@ const connect = (component, reducer, actionsCreator, initialState) => {
   }
 }
 
-const createDispatcher = (reducer, set) => (type, params = {}) => set(state => reducer(state, Object.assign({type}, params)))
 
 module.exports = connect
