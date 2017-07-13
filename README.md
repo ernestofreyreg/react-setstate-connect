@@ -20,8 +20,8 @@ export const initialState = {
 
 export function reducer (state, action) {
   switch (action.type) {
-    case 'INCREASE': return {state, value: state.value + action.value}
-    case 'DECREASE': return {state, value: state.value - action.value}
+    case 'INCREASE': return {...state, value: state.value + action.value}
+    case 'DECREASE': return {...state, value: state.value - action.value}
     default: return state
   }
 }
