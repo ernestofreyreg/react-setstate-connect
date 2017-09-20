@@ -66,6 +66,9 @@ const ValueButton = ({value, increase1, decrease1, delayedIncrease}) => (
 
 export default connect(ValueButton, reducer, createActions, initialState)
 ```
+### New from version 0.4.0
+Passed props to a wrapped component will be part of the initial state making composition easier. 
+
 
 ### Pro tips
 - Keep the state management code and the wrapped component close together.
@@ -74,7 +77,8 @@ all async actions return promises as well.
 - Your wrapped component should never need to use setState directly, if you find yourself adding this.setState then go
 to the actions creator and reducer and add it there.
 - Composition is possible by using the connect wrapper more that once. Each layer will add its own Connected component 
-with holds the state and pass it down as properties.
+with holds the state and pass it down as properties. This properties will become the initial state (along with the passed 
+initialState param in the connect function) of the next wrapped component.
 
 ```jsx harmony
 ...

@@ -117,7 +117,16 @@ describe('connect', () => {
       })
   })
 
-  it('HOC component uses props and state on getState', () => {
+  it('passed props become part of initial state', () => {
+    const wrapped = connect(DummyComponent, reducer, mockActions, {})
+    const component = mount(React.createElement(wrapped, {a: 10, b: 11}))
+    return component.find('DummyComponent').get(0).props.addsToA(4)
+      .then(() => {
+        component.find('DummyComponent').get(0).props.must.have.property('a', 14)
+      })
+  })
+
+  it('HOC component uses props as initial state too in wrapped components', () => {
     const doubleWrapped = connect(DummyComponent, reducerReflection, mockActionsReflection, {})
     const wrapped = connect(doubleWrapped, reducer, mockActions, Object.assign({}, initState, {a: 8}))
 
