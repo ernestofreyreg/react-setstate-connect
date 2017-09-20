@@ -42,6 +42,9 @@
       "beforeEach",
       "describe",
       "it"
+    ],
+    "ignore": [
+      "/lib/**/*.js"
     ]
   }
 }

@@ -14,7 +14,7 @@ const connect = (component, reducer, actionsCreator, initialState) => {
     constructor (props, context) {
       super(props, context)
 
-      this.state = initialState || {}
+      this.state = Object.assign({}, props, initialState || {})
       this.actions = actionsCreator(attach(this))
     }
 
@@ -23,6 +23,5 @@ const connect = (component, reducer, actionsCreator, initialState) => {
     }
   }
 }
-
 
 module.exports = connect

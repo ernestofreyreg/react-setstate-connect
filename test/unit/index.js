@@ -22,6 +22,16 @@ describe('connect', () => {
     }
   }
 
+  const reducerReflection = (state, action) => {
+    switch (action.type) {
+      case 'REFLECTION': {
+        return Object.assign({}, state, {state: action.state})
+      }
+
+      default: return state
+    }
+  }
+
   const mockActions = ({getState, dispatch}) => {
     const addsToA = value => dispatch('ADDS_A', {value})
     const addsToB = value => dispatch('ADDS_B', {value})
@@ -40,6 +50,11 @@ describe('connect', () => {
     }
 
     return {addsToA, addsToB, asyncAddsToA, addsBIntoA}
+  }
+
+  const mockActionsReflection = ({getState, dispatch}) => {
+    const reflection = () => dispatch('REFLECTION', {state: getState()})
+    return {reflection}
   }
 
   it('wraps dummy component', () => {
@@ -99,6 +114,20 @@ describe('connect', () => {
       .then(() => component.find('DummyComponent').get(0).props.addsBIntoA())
       .then(() => {
         component.find('DummyComponent').get(0).props.must.have.property('a', 17)
+      })
+  })
+
+  it('HOC component uses props and state on getState', () => {
+    const doubleWrapped = connect(DummyComponent, reducerReflection, mockActionsReflection, {})
+    const wrapped = connect(doubleWrapped, reducer, mockActions, Object.assign({}, initState, {a: 8}))
+
+    const component = mount(React.createElement(wrapped, {}))
+
+    return component.find('DummyComponent').get(0).props.reflection()
+      .then(() => {
+        component.find('DummyComponent').get(0).props.must.have.property('state')
+        component.find('DummyComponent').get(0).props.state.must.have.property('a', 8)
+        component.find('DummyComponent').get(0).props.state.must.have.property('b', 0)
       })
   })
 })
