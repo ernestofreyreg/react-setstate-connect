@@ -66,8 +66,28 @@ const ValueButton = ({value, increase1, decrease1, delayedIncrease}) => (
 
 export default connect(ValueButton, reducer, createActions, initialState)
 ```
-### New from version 0.4.0
-Passed props to a wrapped component will be part of the initial state making composition easier. 
+### New from version 0.4.1
+In this version we added a `collect` flag to the `connect` function to indicate we want
+to recollect all previous properties as part of the initial state of the HOC. This allows 
+easier compositions of generic HOCs that will end of contributing data to a custom logic 
+that collects all previous data into its state and can perform state changes on them.
+ 
+```jsx harmony
+import withDataPull from 'data-puller'
+
+const DataView = ({data, pullingData, errorData}) => (
+  ...
+)
+
+export default connect(
+  withDataPull('data', getDataService)(DataView),   // Component wrapped by some data service
+  customLogicReducer,         // Custom logic reducer
+  customLogicCreateActions,   // Custom logic createActions
+  {},   // Initial state
+  true  // collect all props and make them part of the store state, this also updates it when component receives new properties
+)
+```
+
 
 
 ### Pro tips
