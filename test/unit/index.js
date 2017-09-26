@@ -169,7 +169,7 @@ describe('connect', () => {
       })
   })
 
-  it('uses alternative syntax reducers/actions/initial state', () => {
+  it('merges reducers/actions/initial state', () => {
     const wrapped = connect(
       DummyComponent,
       {
@@ -192,6 +192,33 @@ describe('connect', () => {
         const changedProps = component.find('Connected').find('DummyComponent').get(0).props
         changedProps.app.must.have.property('a', 0)
         changedProps.app2.must.have.property('a', 5)
+      })
+  })
+
+  it('merges reducers/actions/initial state, collects props right place', () => {
+    const wrapped = connect(
+      DummyComponent,
+      {
+        app: createVariant('A'),
+        app2: createVariant('B')
+      },
+      true
+    )
+
+    const component = mount(React.createElement(wrapped, {app: {a: 4, b: 6}}))
+    const dummyProps = component.find('Connected').find('DummyComponent').get(0).props
+    dummyProps.app.must.have.property('a', 4)
+    dummyProps.app.must.have.property('b', 6)
+    dummyProps.app.must.have.property('addsToA')
+    dummyProps.app.must.have.property('addsToB')
+    dummyProps.app.addsToA.must.be.a.function()
+    dummyProps.app.addsToB.must.be.a.function()
+
+    dummyProps.app.addsToA(5)
+      .then(() => {
+        const changedProps = component.find('Connected').find('DummyComponent').get(0).props
+        changedProps.app.must.have.property('a', 9)
+        changedProps.app2.must.have.property('a', 0)
       })
   })
 })

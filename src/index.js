@@ -15,14 +15,14 @@ const connect = (component, ...params) => {
         super(props, context)
 
         this.state = collect
-          ? Object.assign({}, props, initialState || {})
+          ? deepmerge.all([initialState || {}, props])
           : initialState || {}
         this.actions = createActions(attach(this))
       }
 
       componentWillReceiveProps (nextProps) {
         if (collect) {
-          this.setState(state => Object.assign({}, state, nextProps))
+          this.setState(state => deepmerge.all([state, nextProps]))
         }
       }
 

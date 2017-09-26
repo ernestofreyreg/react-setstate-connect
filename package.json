@@ -17,6 +17,7 @@
   ],
   "author": "Ernesto Freyre <ernestofreyreg@gmail.com>",
   "license": "MIT",
+  "repository": "https://github.com/ernestofreyreg/react-setstate-connect",
   "dependencies": {
     "deepmerge": "^1.5.2"
   },

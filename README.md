@@ -68,7 +68,39 @@ export default connect(ValueButton, reducer, createActions, initialState)
 ```
 
 ### New from version 0.5.0
-Added a way to combine several state handling into the same Connect component. 
+Added a way to combine several state handling into the same connected component. 
+
+```jsx harmony
+const IndexView = props => (
+  <div>...</div>
+)
+
+const reducer = (state, action) => state
+const createActions = ({getState, dispatch}) => ({})
+const initialState = {}
+
+export default connect(
+  IndexView,
+  {
+    orders: getOrdersState(),
+    app: {
+      reducer,
+      createActions,
+      initialState
+    }
+  }
+)
+```
+
+Props passed to wrapped component will be like: 
+```
+{ 
+  app: { ... }, 
+  orders: { ... } 
+}
+```
+
+`collect` flag will also work deep merging all props.
 
 ### New from version 0.4.1
 In this version we added a `collect` flag to the `connect` function to indicate we want
@@ -80,7 +112,7 @@ that collects all previous data into its state and can perform state changes on 
 import withDataPull from 'data-puller'
 
 const DataView = ({data, pullingData, errorData}) => (
-  ...
+  <div>...</div>
 )
 
 export default connect(
