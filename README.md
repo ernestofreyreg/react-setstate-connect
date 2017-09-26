@@ -66,6 +66,10 @@ const ValueButton = ({value, increase1, decrease1, delayedIncrease}) => (
 
 export default connect(ValueButton, reducer, createActions, initialState)
 ```
+
+### New from version 0.5.0
+Added a way to combine several state handling into the same Connect component. 
+
 ### New from version 0.4.1
 In this version we added a `collect` flag to the `connect` function to indicate we want
 to recollect all previous properties as part of the initial state of the HOC. This allows 

@@ -3,7 +3,8 @@
 require('must')
 const React = require('react')
 const { mount } = require('enzyme')
-const connect = require('../../lib/index')
+// const connect = require('../../lib/index')
+const connect = require('../../src/index')
 
 describe('connect', () => {
   const DummyComponent = props => <ol>{Object.keys(props).map(prop => <li key={prop}>{`${prop} = ${props[prop]}`}</li>)}</ol>
@@ -50,6 +51,34 @@ describe('connect', () => {
     }
 
     return {addsToA, addsToB, asyncAddsToA, addsBIntoA}
+  }
+
+  const createVariant = variant => {
+    const ADDS_A = `ADDS_A_${variant}`
+    const ADDS_B = `ADDS_B_${variant}`
+
+    const reducer = (state, action) => {
+      switch (action.type) {
+        case ADDS_A: {
+          return Object.assign({}, state, {a: state.a + action.value})
+        }
+
+        case ADDS_B: {
+          return Object.assign({}, state, {b: state.b + action.value})
+        }
+
+        default: return state
+      }
+    }
+
+    const mockActions = ({getState, dispatch}) => {
+      const addsToA = value => dispatch(ADDS_A, {value})
+      const addsToB = value => dispatch(ADDS_B, {value})
+
+      return {addsToA, addsToB}
+    }
+
+    return { reducer: reducer, createActions: mockActions, initialState: {a: 0, b: 0} }
   }
 
   const mockActionsReflection = ({getState, dispatch}) => {
@@ -137,6 +166,32 @@ describe('connect', () => {
         component.find('DummyComponent').get(0).props.must.have.property('state')
         component.find('DummyComponent').get(0).props.state.must.have.property('a', 8)
         component.find('DummyComponent').get(0).props.state.must.have.property('b', 0)
+      })
+  })
+
+  it('uses alternative syntax reducers/actions/initial state', () => {
+    const wrapped = connect(
+      DummyComponent,
+      {
+        app: createVariant('A'),
+        app2: createVariant('B')
+      }
+    )
+
+    const component = mount(React.createElement(wrapped, {}))
+    const dummyProps = component.find('Connected').find('DummyComponent').get(0).props
+    dummyProps.app.must.have.property('a', 0)
+    dummyProps.app.must.have.property('b', 0)
+    dummyProps.app.must.have.property('addsToA')
+    dummyProps.app.must.have.property('addsToB')
+    dummyProps.app.addsToA.must.be.a.function()
+    dummyProps.app.addsToB.must.be.a.function()
+
+    dummyProps.app2.addsToA(5)
+      .then(() => {
+        const changedProps = component.find('Connected').find('DummyComponent').get(0).props
+        changedProps.app.must.have.property('a', 0)
+        changedProps.app2.must.have.property('a', 5)
       })
   })
 })
