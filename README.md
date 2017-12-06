@@ -1,59 +1,74 @@
 # react-setstate-connect
 
-**react-setstate-connect** is NOT another Flux library. 
-
 This javascript module contains 1 helper function: `connect`
 
-`connect` is a HOC function that wraps React components and allows you to inject props and actions function from a 
+`connect` is a HOC function that wraps React components and allows you
+ to inject props and actions function from a
 redux-like state management construct. 
 
 ### How to use it:
 
-You can put your state management code in a single file, you will need an initial state object, a reducer function 
-in the form **(state, action) => state** and a createActions function in the form **({getState, dispatch}) => {actions}**. 
+You can put your state management code in a single file, you will need
+ a `reducer` function in the form
+```(state, action) => state```, a `createActions` function in the
+form ```({getState, dispatch}) => {actions}```, also an `initialState`
+object.
 
 _state.js_
 ```jsx harmony
-export const initialState = {
-  value: 0
-}
 
-export function reducer (state, action) {
-  switch (action.type) {
-    case 'INCREASE': return {...state, value: state.value + action.value}
-    case 'DECREASE': return {...state, value: state.value - action.value}
-    default: return state
-  }
-}
+export default () => ({
+  initialState: {
+    value: 0
+  },
 
-export function createActions ({getState, dispatch}) {
-  const increase = value => dispatch('INCREASE', {value})
-  const increase1 = () => dispatch('INCREASE', {value: 1})
-  const decrease = value => dispatch('DECREASE', {value})
-  const decrease1 = () => dispatch('DECREASE', {value: 1})
-  
-  const delayedIncrease = () => {
-    return new Promise(resolve => {
-      setTimeout(() => {
-        return resolve(increase(1))
-      }, 1000)
-    })
+  reducer: (state, action) => {
+    switch (action.type) {
+      case 'INCREASE': return {...state, value: state.value + action.value}
+      case 'DECREASE': return {...state, value: state.value - action.value}
+      default: return state
+    }
+  },
+
+  createActions: ({getState, dispatch}) => {
+    const increase = value => dispatch('INCREASE', {value})
+    const decrease = value => dispatch('DECREASE', {value})
+    const increase1 = value => dispatch('INCREASE', {value: 1})
+    const decrease1 = value => dispatch('DECREASE', {value: 1})
+
+    const delayedIncrease = () => new Promise(
+      resolve => setTimeout(() => resolve(increase(1)), 1000)
+    )
+
+    return {
+      increase,
+      decrease,
+      increase1,
+      decrease1,
+      delayedIncrease
+    }
   }
-  
-  return {
-    increase,
-    decrease,
-    delayedIncrease
-  }
-}
+})
 ```
 
-You must wrap your component with the connect function
+This module is exporting a single function that creates an object with 3
+properties `reducer`, the reducer function; `createActions`, a function
+that returns a object containing functions an `initialState` also an object.
+
+`createActions` receives two properties inside an object: `getState` and
+`dispatch`
+- `getState`: Is a function that returns the current store state.
+Ex. ```getState()```
+- `dispatch`: Is a function that always return a **Promise** and allows you
+to dispatch actions to the reducer.
+Ex. ```dispatch(ACTION_TYPE, {key: 'value'})```
+
+...and wrap your component with the `connect` function
 
 _ValueButton.js_
 ```jsx harmony
 import connect from 'react-setstate-connect'
-import { createActions, initialState, reducer } from './state.js'
+import createState from './state.js'
 
 const ValueButton = ({value, increase1, decrease1, delayedIncrease}) => (
   <div>
@@ -64,11 +79,32 @@ const ValueButton = ({value, increase1, decrease1, delayedIncrease}) => (
 )
 
 
+export default connect(ValueButton, createState())
+```
+
+You can also pass those three parameters separated. But, this will be probably
+deprecated in future versions.
+
+```jsx harmony
+import connect from 'react-setstate-connect'
+import createState from './state.js'
+
+const ValueButton = ({value, increase1, decrease1, delayedIncrease}) => (
+  <div>
+    <button onClick={increase1}>Add 1</button><button onClick={delayedIncrease}>Add 1 later</button>
+    <p>{value}</p>
+    <button onClick={decrease1}>Sub 1</button>
+  </div>
+)
+
+const {reducer, createActions, initialState} = createState()
 export default connect(ValueButton, reducer, createActions, initialState)
 ```
 
-### New from version 0.5.0
-Added a way to combine several state handling into the same connected component. 
+The preferred way is to have functions that returns the state construct with
+those 3 properties based on some parameters.
+
+This way you can combine several state handling into the same connected component.
 
 ```jsx harmony
 const IndexView = props => (
@@ -100,10 +136,9 @@ Props passed to wrapped component will be like:
 }
 ```
 
-`collect` flag will also work deep merging all props.
+### Collect flag
 
-### New from version 0.4.1
-In this version we added a `collect` flag to the `connect` function to indicate we want
+We also have a `collect` flag in the `connect` function to indicate we want
 to recollect all previous properties as part of the initial state of the HOC. This allows 
 easier compositions of generic HOCs that will end of contributing data to a custom logic 
 that collects all previous data into its state and can perform state changes on them.
@@ -117,14 +152,14 @@ const DataView = ({data, pullingData, errorData}) => (
 
 export default connect(
   withDataPull('data', getDataService)(DataView),   // Component wrapped by some data service
-  customLogicReducer,         // Custom logic reducer
-  customLogicCreateActions,   // Custom logic createActions
-  {},   // Initial state
-  true  // collect all props and make them part of the store state, this also updates it when component receives new properties
+  {
+    reducer: customLogicReducer,         // Custom logic reducer
+    createActions: customLogicCreateActions,   // Custom logic createActions
+    initialState: {},   // Initial state
+    collect: true  // collect all props and make them part of the store state, this also updates it when component receives new properties
+  }
 )
 ```
-
-
 
 ### Pro tips
 - Keep the state management code and the wrapped component close together.
@@ -135,20 +170,9 @@ to the actions creator and reducer and add it there.
 - Composition is possible by using the connect wrapper more that once. Each layer will add its own Connected component 
 with holds the state and pass it down as properties. This properties will become the initial state (along with the passed 
 initialState param in the connect function) of the next wrapped component.
+- Lift up/down state.
+- Create parametrized state handling functions, those are easier to tests and reuse
 
-```jsx harmony
-...
-
-export default connect(
-  connect(
-    ValueButton, 
-    createValueActions, 
-    initialValueState
-  ),
-  createMoreActions, 
-  moreInitialState
-)
-```
 
 ### Read more
 - [Functional setState is the future of React](https://medium.freecodecamp.org/functional-setstate-is-the-future-of-react-374f30401b6b)

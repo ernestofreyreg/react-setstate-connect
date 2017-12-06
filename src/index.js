@@ -41,6 +41,15 @@ const connect = (component, ...params) => {
 
   const stateHandlers = params[0]
 
+  if (typeof stateHandlers === 'object' && params.length === 1 &&
+    stateHandlers.hasOwnProperty('reducer') &&
+    stateHandlers.hasOwnProperty('createActions') &&
+    stateHandlers.hasOwnProperty('initialState')
+  ) {
+    const {reducer, createActions, initialState, collect = false} = stateHandlers
+    return createConnection(reducer, createActions, initialState, collect)
+  }
+
   const reducer = (state, action) => Object.keys(stateHandlers).reduce(
     (prev, key) => ({...prev, [key]: stateHandlers[key].reducer(state[key], action)}),
     {}

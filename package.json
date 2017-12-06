@@ -1,12 +1,12 @@
 {
   "name": "react-setstate-connect",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "Helper function to connect React's component to a redux-like store using functional setState.",
   "main": "lib/index.js",
   "scripts": {
     "build": "`yarn bin`/babel src --out-dir lib",
     "lint": "standard",
-    "test": "yarn build && NODE_ENV=test mocha --ui bdd --compilers js:babel-register -r ./test/helpers.js --recursive"
+    "test": "NODE_ENV=test mocha --ui bdd --compilers js:babel-register -r ./test/helpers.js --recursive"
   },
   "keywords": [
     "react",

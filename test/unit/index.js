@@ -93,6 +93,21 @@ describe('connect', () => {
     component.find('Connected').find('DummyComponent').must.have.length(1)
   })
 
+  it('also works with state object construct', () => {
+    const createStateManager = () => {
+      return {
+        reducer: reducer,
+        createActions: mockActions,
+        initialState: initState
+      }
+    }
+
+    const wrapped = connect(DummyComponent, createStateManager())
+    const component = mount(React.createElement(wrapped, {}))
+    component.find('Connected').must.have.length(1)
+    component.find('Connected').find('DummyComponent').must.have.length(1)
+  })
+
   it('passes down state and actions as props', () => {
     const wrapped = connect(DummyComponent, reducer, mockActions, initState)
     const component = mount(React.createElement(wrapped, {}))
