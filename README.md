@@ -1,12 +1,24 @@
 # react-setstate-connect
 
-This javascript module contains 1 helper function: `connect`
-
-`connect` is a HOC function that wraps React components and allows you
- to inject props and actions function from a
-redux-like state management construct. 
+This javascript module contains 2 helper functions:
+- `connect`: Is a HOC function that wraps React components and allows you
+ to inject props and actions function from a redux-like state management construct.
+- `serverState`: Allows you to use the same state management construct on the server. Especially useful for server side rendering.
 
 ### How to use it:
+
+ES6 imports
+```
+import connect from 'react-setstate-connect'
+import serverState from 'react-setstate-connect/lib/server'
+```
+
+or
+
+```
+const connect = require('react-setstate-connect')
+const serverState = require('react-setstate-connect/lib/server')
+```
 
 You can put your state management code in a single file, you will need
  a `reducer` function in the form
@@ -167,10 +179,10 @@ state management functions. `react-setstate-connect` constructs can be
 used on the server via a small helper function we included.
 
 ```
-const server = require('react-setstate-connect/server')
+const serverState = require('react-setstate-connect/lib/server')
 const manageState = require('./state')
 
-server(manageState()).loadAsyncData()
+serverState(manageState()).loadAsyncData()
     .then(state => {
         // Do something with state.data
     })
@@ -207,7 +219,8 @@ export default () => ({
     },
     createActions: ({dispatch}) => ({
         loadData: () => axios.get('/api/data')
-            .then(response => dispatch(LOADED_DATA, {data: response.data})
+            .then(response => response.data, () => []) // Added error handling here, just returns an empty array
+            .then(data => dispatch(LOADED_DATA, {data})
     })
 })
 ```
