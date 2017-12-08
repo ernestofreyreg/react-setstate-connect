@@ -161,6 +161,108 @@ export default connect(
 )
 ```
 
+### Server side rendering
+Many web apps try to implement Server Side Render by reusing the same
+state management functions. `react-setstate-connect` constructs can be
+used on the server via a small helper function we included.
+
+```
+const server = require('react-setstate-connect/server')
+const manageState = require('./state')
+
+server(manageState()).loadAsyncData()
+    .then(state => {
+        // Do something with state.data
+    })
+```
+
+#### Next.js example
+Next.js (https://github.com/zeit/next.js) is a
+"Framework for server-rendered or statically-exported React apps" they
+implemented a fairly simple way to inject server side data to your
+React apps via adding an async `getInitialProps` function in your page
+root component. This function can receive Request/Response object like
+any HTTP middleware function. So, it can check for cookies, make
+redirects, etc.
+
+Assuming we have a Next.js app with a page that connects to a state
+management construct that loads data async using on action function. We
+can do:
+
+_state/page-state.js
+```
+import axios from 'axios'
+
+const LOADED_DATA = 'LOADED_DATA'
+
+export default () => ({
+    collect: true, // <- collect flag must be true
+    initialState: {data: null}
+    reducer: (state, action) => {
+        switch (action.type) {
+            case LOADED_DATA: return {...state, data: action.data}
+        }
+
+        return state
+    },
+    createActions: ({dispatch}) => ({
+        loadData: () => axios.get('/api/data')
+            .then(response => dispatch(LOADED_DATA, {data: response.data})
+    })
+})
+```
+
+_pages/page.js_
+```
+import React from 'react'
+import connect from 'react-setstate-connect'
+import server from 'react-setstate-connect/server'
+import managePageState from '../state/page-state'
+import { Panel, DataList, Button } from '../components'
+
+const Page = ({
+    data,
+    loadData
+}) => (
+    <Panel>
+        <DataList data={data} />
+
+        <Button onClick={loadData}>
+            Refresh List
+        </Button>
+    </Panel>
+)
+
+const ConnectedPage = connect(Page, managePageState())
+
+ConnectedPage.getInitialProps = () => {
+    return server(managePageState()).loadData()
+}
+
+export default ConnectedPage
+```
+
+On the server, you should take care of cookies and using the correct URL for
+the api endpoint. But, since the state management construct is a function
+we can make it to accept those as parameters and use it accordingly.
+
+_state/page-state.js
+```
+import axios from 'axios'
+
+const LOADED_DATA = 'LOADED_DATA'
+
+export default (cookies, urlBase) => ({
+    ...
+    createActions: ({dispatch}) => ({
+        loadData: () => axios.get('${urlBase}/api/data', {headers: {...}})
+         ...
+    })
+})
+```
+
+Anything is possible since is just a function.
+
 ### Pro tips
 - Keep the state management code and the wrapped component close together.
 - By default all actions in the form **(props) => dispatch(type, props)** return promises, so, is a good thing to make 

@@ -3,7 +3,6 @@
 require('must')
 const React = require('react')
 const { mount } = require('enzyme')
-// const connect = require('../../lib/index')
 const connect = require('../../src/index')
 
 describe('connect', () => {
