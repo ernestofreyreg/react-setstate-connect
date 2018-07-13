@@ -1,4 +1,4 @@
-module.exports = ({initialState, reducer, createActions}) => {
+const serverState = ({ initialState, reducer, createActions }) => {
   let state = initialState
 
   const getState = () => state
@@ -9,3 +9,5 @@ module.exports = ({initialState, reducer, createActions}) => {
 
   return createActions({getState, dispatch})
 }
+
+export default serverState

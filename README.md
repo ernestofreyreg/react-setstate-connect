@@ -24,7 +24,7 @@ You can put your state management code in a single file, you will need
  a `reducer` function in the form
 ```(state, action) => state```, a `createActions` function in the
 form ```({getState, dispatch}) => {actions}```, also an `initialState`
-object.
+object (if not declared an empty object will be used).
 
 _state.js_
 ```jsx harmony
@@ -63,7 +63,7 @@ export default () => ({
 })
 ```
 
-This module is exporting a single function that creates an object with 3
+This example module is exporting a single function that creates an object with 3
 properties `reducer`, the reducer function; `createActions`, a function
 that returns a object containing functions an `initialState` also an object.
 
@@ -94,69 +94,15 @@ const ValueButton = ({value, increase1, decrease1, delayedIncrease}) => (
 export default connect(ValueButton, createState())
 ```
 
-You can also pass those three parameters separated. But, this will be probably
-deprecated in future versions.
-
-```jsx harmony
-import connect from 'react-setstate-connect'
-import createState from './state.js'
-
-const ValueButton = ({value, increase1, decrease1, delayedIncrease}) => (
-  <div>
-    <button onClick={increase1}>Add 1</button><button onClick={delayedIncrease}>Add 1 later</button>
-    <p>{value}</p>
-    <button onClick={decrease1}>Sub 1</button>
-  </div>
-)
-
-const {reducer, createActions, initialState} = createState()
-export default connect(ValueButton, reducer, createActions, initialState)
-```
-
-The preferred way is to have functions that returns the state construct with
-those 3 properties based on some parameters.
-
-This way you can combine several state handling into the same connected component.
-
-```jsx harmony
-const IndexView = props => (
-  <div>...</div>
-)
-
-const reducer = (state, action) => state
-const createActions = ({getState, dispatch}) => ({})
-const initialState = {}
-
-export default connect(
-  IndexView,
-  {
-    orders: getOrdersState(),
-    app: {
-      reducer,
-      createActions,
-      initialState
-    }
-  }
-)
-```
-
-Props passed to wrapped component will be like: 
-```
-{ 
-  app: { ... }, 
-  orders: { ... } 
-}
-```
-
 ### Collect flag
 
 We also have a `collect` flag in the `connect` function to indicate we want
-to recollect all previous properties as part of the initial state of the HOC. This allows 
-easier compositions of generic HOCs that will end of contributing data to a custom logic 
+to recollect all previous properties as part of the initial state of the HOC. This allows
+easier compositions of generic HOCs that will end of contributing data to a custom logic
 that collects all previous data into its state and can perform state changes on them.
- 
+
 ```jsx harmony
-import withDataPull from 'data-puller'
+import withDataPull from './data-puller'
 
 const DataView = ({data, pullingData, errorData}) => (
   <div>...</div>
@@ -173,12 +119,13 @@ export default connect(
 )
 ```
 
-### Server side rendering
+### Server side rendering and tests
 Many web apps try to implement Server Side Render by reusing the same
 state management functions. `react-setstate-connect` constructs can be
-used on the server via a small helper function we included.
+used on the server via a small helper function we included `serverState`.
+This function can also be used for testing state management.
 
-```
+```javascript
 const serverState = require('react-setstate-connect/lib/server')
 const manageState = require('./state')
 
@@ -186,6 +133,16 @@ serverState(manageState()).loadAsyncData()
     .then(state => {
         // Do something with state.data
     })
+
+// You can also chain async actions.
+
+const server = serverState(manageState())
+server.loadAsyncData()
+  .then(() => server.doOtherAsyncTask())
+  .then(state => server.yetAnotherAsyncTask(state.someProp)) // state is returned in each promise
+  .then(() => {
+    console.log(server.getState())
+  })
 ```
 
 #### Next.js example
@@ -202,7 +159,7 @@ management construct that loads data async using on action function. We
 can do:
 
 _state/page-state.js
-```
+```javascript
 import axios from 'axios'
 
 const LOADED_DATA = 'LOADED_DATA'
@@ -226,10 +183,10 @@ export default () => ({
 ```
 
 _pages/page.js_
-```
+```jsx
 import React from 'react'
 import connect from 'react-setstate-connect'
-import server from 'react-setstate-connect/server'
+import server from 'react-setstate-connect/lib/server'
 import managePageState from '../state/page-state'
 import { Panel, DataList, Button } from '../components'
 
@@ -248,6 +205,7 @@ const Page = ({
 
 const ConnectedPage = connect(Page, managePageState())
 
+// Server-Side-Render portion, will initialize state manager, call async function and return value as initial props.
 ConnectedPage.getInitialProps = () => {
     return server(managePageState()).loadData()
 }
@@ -260,7 +218,7 @@ the api endpoint. But, since the state management construct is a function
 we can make it to accept those as parameters and use it accordingly.
 
 _state/page-state.js
-```
+```javascript
 import axios from 'axios'
 
 const LOADED_DATA = 'LOADED_DATA'
@@ -278,12 +236,12 @@ Anything is possible since is just a function.
 
 ### Pro tips
 - Keep the state management code and the wrapped component close together.
-- By default all actions in the form **(props) => dispatch(type, props)** return promises, so, is a good thing to make 
+- By default all actions in the form **(props) => dispatch(type, props)** return promises, so, is a good thing to make
 all async actions return promises as well.
 - Your wrapped component should never need to use setState directly, if you find yourself adding this.setState then go
 to the actions creator and reducer and add it there.
-- Composition is possible by using the connect wrapper more that once. Each layer will add its own Connected component 
-with holds the state and pass it down as properties. This properties will become the initial state (along with the passed 
+- Composition is possible by using the connect wrapper more that once. Each layer will add its own Connected component
+which  holds the state and pass it down as properties. This properties will become the initial state (along with the passed
 initialState param in the connect function) of the next wrapped component.
 - Lift up/down state.
 - Create parametrized state handling functions, those are easier to tests and reuse
