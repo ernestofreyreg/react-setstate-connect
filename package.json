@@ -1,6 +1,6 @@
 {
   "name": "react-setstate-connect",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Helper function to connect React's component to a redux-like store using functional setState.",
   "main": "lib/index.js",
   "scripts": {

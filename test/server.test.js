@@ -38,43 +38,44 @@ const manageState = () => ({ reducer, createActions, initialState })
 test('creates server state handler', () => {
   const server = serverState(manageState())
   const expected = ['addsToA', 'addsToB', 'asyncAddsToA', 'addsBIntoA']
-  expect(Object.keys(server)).toEqual(expect.arrayContaining(expected))
+  expect(Object.keys(server.getState())).toEqual(expect.arrayContaining(expected))
 })
 
 test('calling action returns', () => {
   const server = serverState(manageState())
-  return server.addsToA(50)
-    .then(state => {
-      expect(state.a).toEqual(50)
+  return server.actions.addsToA(50)
+    .then(() => {
+      expect(server.getState().a).toEqual(50)
     })
 })
 
 test('calling repeated actions keeps state', () => {
   const server = serverState(manageState())
-  return server.addsToA(50)
-    .then(state => {
-      expect(state.a).toEqual(50)
-      return server.addsToA(4)
+  return server.actions.addsToA(50)
+    .then(() => {
+      expect(server.getState().a).toEqual(50)
+      return server.actions.addsToA(4)
     })
-    .then(state => {
-      expect(state.a).toEqual(54)
+    .then(() => {
+      expect(server.getState().a).toEqual(54)
     })
 })
 
 test('also works with promises', () => {
   const server = serverState(manageState())
-  return server.asyncAddsToA(50)
-    .then(state => {
-      expect(state.a).toEqual(50)
+  return server.actions.asyncAddsToA(50)
+    .then(() => {
+      expect(server.getState().a).toEqual(50)
     })
 })
 
 test('keeping state with promises', () => {
   const server = serverState(manageState())
-  return server.asyncAddsToA(50)
-    .then(() => server.asyncAddsToA(4))
-    .then(() => server.addsToB(10))
-    .then(state => {
+  return server.actions.asyncAddsToA(50)
+    .then(() => server.actions.asyncAddsToA(4))
+    .then(() => server.actions.addsToB(10))
+    .then(() => {
+      const state = server.getState()
       expect(state.a).toEqual(54)
       expect(state.b).toEqual(10)
     })
@@ -82,11 +83,10 @@ test('keeping state with promises', () => {
 
 test('can use getState in actions', () => {
   const server = serverState(manageState())
-  server.addsToB(10)
-  server.addsToA(4)
-
-  server.addsBIntoA()
-    .then(state => {
-      expect(state.a).toEqual(14)
+  return server.actions.addsToB(10)
+    .then(() => server.actions.addsToA(4))
+    .then(() => server.actions.addsBIntoA())
+    .then(() => {
+      expect(server.getState().a).toEqual(14)
     })
 })

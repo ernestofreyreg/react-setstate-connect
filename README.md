@@ -129,17 +129,21 @@ This function can also be used for testing state management.
 const serverState = require('react-setstate-connect/lib/server')
 const manageState = require('./state')
 
-serverState(manageState()).loadAsyncData()
-    .then(state => {
+const server = serverState(manageState())
+
+return server.actions.loadAsyncData()
+    .then(() => {
         // Do something with state.data
+        const currentState = server.getState()
+        // ...
     })
 
 // You can also chain async actions.
 
 const server = serverState(manageState())
-server.loadAsyncData()
-  .then(() => server.doOtherAsyncTask())
-  .then(state => server.yetAnotherAsyncTask(state.someProp)) // state is returned in each promise
+server.actions.loadAsyncData()
+  .then(() => server.actions.doOtherAsyncTask())
+  .then(() => server.actions.yetAnotherAsyncTask(server.getState().someProp))
   .then(() => {
     console.log(server.getState())
   })
