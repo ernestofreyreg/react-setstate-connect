@@ -43,15 +43,22 @@ test('creates server state handler', () => {
 
 test('calling action returns', () => {
   const server = serverState(manageState())
-  const state = server.addsToA(50)
-  expect(state.a).toEqual(50)
+  return server.addsToA(50)
+    .then(state => {
+      expect(state.a).toEqual(50)
+    })
 })
 
 test('calling repeated actions keeps state', () => {
   const server = serverState(manageState())
-  const state = server.addsToA(50)
-  expect(state.a).toEqual(50)
-  expect(server.addsToA(4).a).toEqual(54)
+  return server.addsToA(50)
+    .then(state => {
+      expect(state.a).toEqual(50)
+      return server.addsToA(4)
+    })
+    .then(state => {
+      expect(state.a).toEqual(54)
+    })
 })
 
 test('also works with promises', () => {
@@ -78,6 +85,8 @@ test('can use getState in actions', () => {
   server.addsToB(10)
   server.addsToA(4)
 
-  const state = server.addsBIntoA()
-  expect(state.a).toEqual(14)
+  server.addsBIntoA()
+    .then(state => {
+      expect(state.a).toEqual(14)
+    })
 })

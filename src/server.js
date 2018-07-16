@@ -4,7 +4,7 @@ const serverState = ({ initialState, reducer, createActions }) => {
   const getState = () => state
   const dispatch = (type, params) => {
     state = reducer(state, Object.assign({type}, params))
-    return state
+    return Promise.resolve(state)
   }
 
   return createActions({getState, dispatch})
