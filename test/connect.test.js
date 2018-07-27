@@ -114,8 +114,8 @@ test('async actions have access to state via get', () => {
     })
 })
 
-test('passed props become part of initial state with collect flag', () => {
-  const wrapped = connect(DummyComponent, { reducer, createActions: mockActions, initialState: {}, collect: true })
+test('passed props become part of initial state', () => {
+  const wrapped = connect(DummyComponent, { reducer, createActions: mockActions, initialState: {} })
   const component = renderer.create(React.createElement(wrapped, {a: 10, b: 11}))
   const dummy = component.root.findByType(DummyComponent)
   return dummy.props.addsToA(4)
@@ -144,8 +144,8 @@ test('initialState can be undefined, assumes empty object', () => {
     })
 })
 
-test('initialState can be undefined, assumes empty object, with collect=true', () => {
-  const wrapped = connect(DummyComponent, { reducer, createActions: mockActions, collect: true })
+test('initialState can be undefined, assumes empty object', () => {
+  const wrapped = connect(DummyComponent, { reducer, createActions: mockActions })
   const component = renderer.create(React.createElement(wrapped, {}))
   const dummy = component.root.findByType(DummyComponent)
   return dummy.props.addsToA(4)
