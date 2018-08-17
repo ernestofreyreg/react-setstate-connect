@@ -1,6 +1,10 @@
-import React from 'react'
-import connect from '../src'
-import renderer from 'react-test-renderer'
+require('babel-core')
+
+const React = require('react')
+const ReactSetStateConnect = require('../src')
+const renderer = require('react-test-renderer')
+
+const connect = ReactSetStateConnect.default
 
 const DummyComponent = props => <ol>{Object.keys(props).map(prop => <li key={prop}>{`${prop} = ${props[prop]}`}</li>)}</ol>
 const initialState = {a: 0, b: 0}
