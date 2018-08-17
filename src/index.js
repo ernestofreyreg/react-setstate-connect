@@ -5,7 +5,7 @@ import * as React from 'react'
 export type Reducer = (state: Object, action: { type: string, [string]: mixed }) => Object
 export type ActionCall = () => mixed
 export type GetStateCall = () => Object
-export type DispatchCall = (type: string, payload?: Object) => mixed
+export type DispatchCall = (type: string, payload?: Object) => Promise<any>
 export type ActionSet = { [string]: Function }
 export type ActionParams = { getState: GetStateCall, dispatch: DispatchCall }
 export type ActionsCreator = (ActionParams) => ActionSet

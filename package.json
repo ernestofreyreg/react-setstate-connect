@@ -1,6 +1,6 @@
 {
   "name": "react-setstate-connect",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Helper function to connect React's component to a redux-like store using functional setState.",
   "main": "lib/index.js",
   "scripts": {
@@ -8,7 +8,7 @@
     "lint": "standard",
     "test": "yarn flow && yarn lint && yarn test:unit",
     "flow": "flow",
-    "build:flow": "cp src/*.js.flow lib/",
+    "build:flow": "flow-copy-source -v src lib",
     "test:unit": "jest --coverage"
   },
   "keywords": [
@@ -39,6 +39,7 @@
     "babel-register": "^6.26.0",
     "eslint-plugin-flowtype": "^2.50.0",
     "flow-bin": "^0.78.0",
+    "flow-copy-source": "^2.0.2",
     "jest": "^23.4.1",
     "react": "^16",
     "react-dom": "^16",
