@@ -5,6 +5,11 @@ This javascript module contains 2 helper functions:
  to inject props and actions function from a redux-like state management construct.
 - `serverState`: Allows you to use the same state management construct on the server. Especially useful for server side rendering.
 
+**Version 2.0.0 With Flow type definitions**
+
+This version of `react-setconnect-state` includes flow definitions for the basic
+state manager construct.
+
 ### How to use it:
 
 ES6 imports
