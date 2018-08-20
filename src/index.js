@@ -2,25 +2,24 @@
 
 import * as React from 'react'
 
-export type Reducer = (state: Object, action: { type: string, [string]: mixed }) => Object
+export type Reducer<S, T> = (state: S, action: { type: T, [string]: mixed }) => S
 export type ActionCall = () => mixed
-export type GetStateCall = () => Object
-export type DispatchCall = (type: string, payload?: Object) => Promise<any>
+export type GetStateCall<S> = () => S
+export type DispatchCall<T> = (type: T, payload?: Object) => Promise<any>
 export type ActionSet = { [string]: Function }
-export type ActionParams = { getState: GetStateCall, dispatch: DispatchCall }
-export type ActionsCreator = (ActionParams) => ActionSet
-export type StateManager = {
-  initialState: Object | void,
-  reducer: Reducer,
-  createActions: ActionsCreator,
+export type ActionParams<S, T> = { getState: GetStateCall<S>, dispatch: DispatchCall<T> }
+export type StateManager<S, A, T> = {
+  initialState: S,
+  reducer: Reducer<S, T>,
+  createActions: (ActionParams<S, T>) => A,
   collect: ?boolean
 }
 
 const mergeAll = (arr) => arr.reduce((prev, item) => Object.assign(prev, item), {})
 
-const connect = (
+const connect<S, A> = (
   component: React.ComponentType<any>,
-  stateManager: StateManager
+  stateManager: StateManager<S, A>
 ):React.ComponentType<any> => {
   const attach = (instance):ActionParams => ({
     getState: () => instance.state || {},
