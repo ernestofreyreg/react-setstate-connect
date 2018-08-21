@@ -5,10 +5,15 @@ This javascript module contains 2 helper functions:
  to inject props and actions function from a redux-like state management construct.
 - `serverState`: Allows you to use the same state management construct on the server. Especially useful for server side rendering.
 
-**Version 2.0.0 With Flow type definitions**
+**Version 3.0.0 BREAKING CHANGES**
+Version 3.0.0 adds some important breaking changes.
 
-This version of `react-setconnect-state` includes flow definitions for the basic
-state manager construct.
+- Previously all state and actions where merged and passed together in the components properties. In this version wrapped component will receive 2 props: state and actions.
+- Flow js type definitions where considerably improved.
+
+**Version 2.1.0 With Flow type definitions**
+
+This version of `react-setconnect-state` includes flow type definitions for the basic state manager construct.
 
 ### How to use it:
 
@@ -50,8 +55,8 @@ export default () => ({
   createActions: ({getState, dispatch}) => {
     const increase = value => dispatch('INCREASE', {value})
     const decrease = value => dispatch('DECREASE', {value})
-    const increase1 = value => dispatch('INCREASE', {value: 1})
-    const decrease1 = value => dispatch('DECREASE', {value: 1})
+    const increase1 = () => dispatch('INCREASE', {value: 1})
+    const decrease1 = () => dispatch('DECREASE', {value: 1})
 
     const delayedIncrease = () => new Promise(
       resolve => setTimeout(() => resolve(increase(1)), 1000)
@@ -87,41 +92,46 @@ _ValueButton.js_
 import connect from 'react-setstate-connect'
 import createState from './state.js'
 
-const ValueButton = ({value, increase1, decrease1, delayedIncrease}) => (
+const ValueButton = ({
+  state: { value },
+  actions: {
+    increase1,
+    decrease1,
+    delayedIncrease
+  }) => (
   <div>
-    <button onClick={increase1}>Add 1</button><button onClick={delayedIncrease}>Add 1 later</button>
+    <button onClick={increase1}>Add 1</button>
+    <button onClick={delayedIncrease}>Add 1 later</button>
     <p>{value}</p>
     <button onClick={decrease1}>Sub 1</button>
   </div>
 )
 
-
 export default connect(ValueButton, createState())
 ```
 
-### Collect flag
+### Auto merge props
 
-We also have a `collect` flag in the `connect` function to indicate we want
-to recollect all previous properties as part of the initial state of the HOC. This allows
-easier compositions of generic HOCs that will end of contributing data to a custom logic
-that collects all previous data into its state and can perform state changes on them.
+Once wrapped our component we might still want to pass props to it, those
+properties are merged in overwriting the initial state and passed down in the `state` prop.
 
 ```jsx harmony
-import withDataPull from './data-puller'
+import dataPull from './data-puller'
 
-const DataView = ({data, pullingData, errorData}) => (
+const DataView = ({
+  state: { data, error },
+  actions: { pullingData }
+}) => (
   <div>...</div>
 )
 
-export default connect(
-  withDataPull('data', getDataService)(DataView),   // Component wrapped by some data service
-  {
-    reducer: customLogicReducer,         // Custom logic reducer
-    createActions: customLogicCreateActions,   // Custom logic createActions
-    initialState: {},   // Initial state
-    collect: true  // collect all props and make them part of the store state, this also updates it when component receives new properties
-  }
-)
+const ConnectedData = connect(DataView, dataPull())
+
+// state.data = default initial state
+<ConnectedData />
+
+// state.data = preloadedData
+<ConnectedData data={preloadedData} />
 ```
 
 ### Server side rendering and tests
@@ -174,7 +184,6 @@ import axios from 'axios'
 const LOADED_DATA = 'LOADED_DATA'
 
 export default () => ({
-    collect: true, // <- collect flag must be true
     initialState: {data: null}
     reducer: (state, action) => {
         switch (action.type) {
@@ -200,8 +209,8 @@ import managePageState from '../state/page-state'
 import { Panel, DataList, Button } from '../components'
 
 const Page = ({
-    data,
-    loadData
+    state: { data },
+    actions: { loadData }
 }) => (
     <Panel>
         <DataList data={data} />
@@ -216,7 +225,10 @@ const ConnectedPage = connect(Page, managePageState())
 
 // Server-Side-Render portion, will initialize state manager, call async function and return value as initial props.
 ConnectedPage.getInitialProps = () => {
-    return server(managePageState()).loadData()
+  const ssr = server(managePageState())
+
+  return ssr.actions.loadData()
+    .then(() => ssr.getState())
 }
 
 export default ConnectedPage

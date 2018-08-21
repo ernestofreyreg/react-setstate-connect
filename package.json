@@ -16,7 +16,10 @@
     "setState",
     "redux",
     "flux",
-    "alternative"
+    "alternative",
+    "flow",
+    "server side render",
+    "ssr"
   ],
   "author": "Ernesto Freyre <ernestofreyreg@gmail.com>",
   "license": "MIT",

@@ -2,48 +2,48 @@
 
 import * as React from 'react'
 
-export type Reducer = (state: Object, action: { type: string, [string]: mixed }) => Object
-export type ActionCall = () => mixed
-export type GetStateCall = () => Object
+export type Reducer<S> = (state: S, action: { type: string, [string]: any }) => S
+export type GetStateCall<S> = () => S
 export type DispatchCall = (type: string, payload?: Object) => Promise<any>
 export type ActionSet = { [string]: Function }
-export type ActionParams = { getState: GetStateCall, dispatch: DispatchCall }
-export type ActionsCreator = (ActionParams) => ActionSet
-export type StateManager = {
-  initialState: Object | void,
-  reducer: Reducer,
-  createActions: ActionsCreator,
-  collect: ?boolean
+export type ActionParams<S> = { getState: GetStateCall<S>, dispatch: DispatchCall }
+export type StateManager<S, A: $Shape<ActionSet>> = {
+  initialState: S,
+  reducer: Reducer<S>,
+  createActions: (ActionParams<S>) => A
 }
 
-const mergeAll = (arr) => arr.reduce((prev, item) => Object.assign(prev, item), {})
+const merge = <S, O>(state: S, props: O):S => (Object.assign({}, state, props): S)
 
-const connect = (
-  component: React.ComponentType<any>,
-  stateManager: StateManager
-):React.ComponentType<any> => {
-  const attach = (instance):ActionParams => ({
-    getState: () => instance.state || {},
+const connect = <S, A, O>(
+  component: React.ComponentType<{state: S, actions: A}>,
+  stateManager: StateManager<S, A>
+):React.ComponentType<O> => {
+  const attach = (instance):ActionParams<S> => ({
+    getState: () => instance.state,
     dispatch: createDispatcher(stateManager.reducer, fn => new Promise(resolve => instance.setState(fn, resolve)))
   })
 
-  const createDispatcher = (reducer, set) => (type, params = {}) => set(state => reducer(state, Object.assign({ type }, params)))
+  const createDispatcher = (reducer: Reducer<S>, set) => (type: string, params: Object = {}) => set((state: S) => reducer(state, Object.assign({ type }, params)))
 
-  return class Connected extends React.PureComponent<*, *> {
-    actions: ActionSet
+  return class Connected extends React.Component<O, S> {
+    actions: A
 
-    constructor (props) {
+    constructor (props: O) {
       super(props)
 
-      this.state = (stateManager.collect)
-        ? mergeAll([stateManager.initialState || {}, props])
-        : stateManager.initialState || {}
-
+      this.state = merge(stateManager.initialState, props)
       this.actions = stateManager.createActions(attach(this))
     }
 
     render () {
-      return React.createElement(component, mergeAll([this.props, this.actions, this.state]))
+      return React.createElement(
+        component,
+        {
+          state: this.state,
+          actions: this.actions
+        }
+      )
     }
   }
 }
