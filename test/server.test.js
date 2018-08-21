@@ -1,3 +1,5 @@
+// @flow
+
 import serverState from '../src/server'
 
 const initialState = {a: 0, b: 0}
