@@ -1,9 +1,15 @@
 // @flow
 
-import type { StateManager } from './index.js'
+import type { StateManager, DispatchCall, ActionSet } from './index.js'
 
-const serverState = (stateManager: StateManager) => {
-  let state = stateManager.initialState || {}
+export type Server<S, A: $Shape<ActionSet>> = {
+  getState: () => S,
+  dispatch: DispatchCall,
+  actions: A
+}
+
+const serverState = <S, A>(stateManager: StateManager<S, A>): Server<S, A> => {
+  let state = stateManager.initialState
 
   const getState = () => Object.assign({}, state, actions)
   const dispatch = (type: string, params?: Object) => {
