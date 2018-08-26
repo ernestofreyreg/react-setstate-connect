@@ -7,10 +7,8 @@ This javascript module contains 2 helper functions:
 
 **Version 4.0.0**
 
-Version 3.0.0 adds some important breaking changes.
-
 - All state and actions are merged and passed together in the components properties
-- Flow js type definitions where considerably improved.
+- This version lacks flow type definitions. (Future versions will reimplement them in a more simple way)
 
 **Version 3.0.0 DEPRECATED VERSION**
 
@@ -98,12 +96,11 @@ import connect from 'react-setstate-connect'
 import createState from './state.js'
 
 const ValueButton = ({
-  state: { value },
-  actions: {
-    increase1,
-    decrease1,
-    delayedIncrease
-  }) => (
+  value,
+  increase1,
+  decrease1,
+  delayedIncrease
+}) => (
   <div>
     <button onClick={increase1}>Add 1</button>
     <button onClick={delayedIncrease}>Add 1 later</button>
@@ -124,8 +121,9 @@ properties are merged in overwriting the initial state and passed down in the `s
 import dataPull from './data-puller'
 
 const DataView = ({
-  state: { data, error },
-  actions: { pullingData }
+  data,
+  error,
+  pullingData
 }) => (
   <div>...</div>
 )
@@ -214,8 +212,8 @@ import managePageState from '../state/page-state'
 import { Panel, DataList, Button } from '../components'
 
 const Page = ({
-    state: { data },
-    actions: { loadData }
+    data,
+    loadData
 }) => (
     <Panel>
         <DataList data={data} />
