@@ -1,14 +1,12 @@
 {
   "name": "react-setstate-connect",
-  "version": "3.0.0",
+  "version": "4.0.0",
   "description": "Helper function to connect React's component to a redux-like store using functional setState.",
   "main": "lib/index.js",
   "scripts": {
-    "build": "`yarn bin`/babel src --out-dir lib && yarn build:flow",
+    "build": "`yarn bin`/babel src --out-dir lib",
     "lint": "standard",
-    "test": "yarn flow && yarn lint && yarn test:unit",
-    "flow": "flow check",
-    "build:flow": "flow-copy-source -v src lib",
+    "test": "yarn lint && yarn test:unit",
     "test:unit": "jest --coverage"
   },
   "keywords": [
@@ -17,7 +15,6 @@
     "redux",
     "flux",
     "alternative",
-    "flow",
     "server side render",
     "ssr"
   ],
@@ -32,7 +29,7 @@
     "babel-cli": "^6.26.0",
     "babel-core": "^6.26.3",
     "babel-eslint": "^8.2.6",
-    "babel-jest": "^23.4.0",
+    "babel-jest": "^23.4.2",
     "babel-plugin-transform-flow-strip-types": "^6.22.0",
     "babel-polyfill": "^6.26.0",
     "babel-preset-env": "^1.7.0",
@@ -40,20 +37,15 @@
     "babel-preset-react": "^6.24.1",
     "babel-preset-stage-1": "^6.24.1",
     "babel-register": "^6.26.0",
-    "eslint-plugin-flowtype": "^2.50.0",
-    "flow-bin": "^0.78.0",
-    "flow-copy-source": "^2.0.2",
     "jest": "^23.4.1",
     "react": "^16",
     "react-dom": "^16",
     "react-test-renderer": "^16.4.1",
+    "regenerator-runtime": "^0.12.1",
     "standard": "^11.0.1"
   },
   "standard": {
     "parser": "babel-eslint",
-    "plugins": [
-      "flowtype"
-    ],
     "globals": [
       "test",
       "expect",
@@ -68,8 +60,7 @@
       "jest"
     ],
     "ignore": [
-      "/lib/**/*.js",
-      "flow-typed/**/*.js"
+      "/lib/**/*.js"
     ]
   }
 }

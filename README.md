@@ -5,11 +5,16 @@ This javascript module contains 2 helper functions:
  to inject props and actions function from a redux-like state management construct.
 - `serverState`: Allows you to use the same state management construct on the server. Especially useful for server side rendering.
 
-**Version 3.0.0 BREAKING CHANGES**
+**Version 4.0.0**
+
 Version 3.0.0 adds some important breaking changes.
 
-- Previously all state and actions where merged and passed together in the components properties. In this version wrapped component will receive 2 props: state and actions.
+- All state and actions are merged and passed together in the components properties
 - Flow js type definitions where considerably improved.
+
+**Version 3.0.0 DEPRECATED VERSION**
+
+Sadly we had to deprecate this short lived version.
 
 **Version 2.1.0 With Flow type definitions**
 
